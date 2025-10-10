@@ -20,9 +20,15 @@ lerna-debug.log*
 Thumbs.db
 
 # Environment files
-# .env
-# .env.*
-# !.env.example
+.env
+.env.*
+!.env.example
+
+# Service account keys and secrets
+service-account-key.json
+*.json.key
+*.pem
+*.p12
 
 # Runtime data
 pids
