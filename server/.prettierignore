@@ -1,0 +1,42 @@
+# Ignore build and dependency folders
+node_modules
+dist
+build
+coverage
+
+# Ignore lock files and environment files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.env
+.env.*
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore generated files
+*.min.js
+*.bundle.js
+
+# Ignore specific folders (optional)
+public
+out
+.next
+.vscode
+
+# Ignore assets
+**/*.svg
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.webp
+**/*.ico
+**/*.mp4
+**/*.mp3
+
+# Ignore specific config or docs files
+*.md
+*.mdx
+*.snap
+*.log
