@@ -72,8 +72,8 @@ TAIL.ai is a comprehensive platform for building, testing, and deploying AI agen
    ```
 
 4. **Access the application**
-   - Frontend: http://localhost:5173
-   - Backend: http://localhost:5000
+   - Frontend: http://localhost:3000
+   - Backend: http://localhost:8000
 
 ## Architecture
 
