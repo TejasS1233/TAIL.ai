@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAIL.ai - Workflow with Zoom Controls</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        /* Custom styles for the workflow editor */
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            background-color: #f0f2f5;
+        }
+
+        #viewport {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+        }
+
+        #workflow-container {
+            position: absolute;
+            transform-origin: 0 0;
+            width: 4000px; /* A large canvas for the workflow */
+            height: 4000px;
+            background-image:
+                linear-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .workflow-node {
+            position: absolute;
+            min-width: 180px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border: 1px solid #e2e8f0;
+            cursor: default;
+            user-select: none;
+            transition: box-shadow 0.2s ease-in-out;
+        }
+
+        .workflow-node:hover {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+
+        .node-header {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+        }
+
+        .node-content {
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        #zoom-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background-color: white;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .control-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #d1d5db;
+            background-color: #ffffff;
+            color: #374151;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .control-btn:hover {
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body>
+    <!-- The main viewport for the workflow -->
+    <div id="viewport">
+        <!-- The container that will be panned and zoomed -->
+        <div id="workflow-container">
+            <!-- Placeholder for your actual workflow nodes -->
+            <div class="workflow-node" style="top: 200px; left: 300px;">
+                <div class="node-header bg-blue-50 text-blue-800">Start Trigger</div>
+                <div class="node-content">When a new file is uploaded...</div>
+            </div>
+            <div class="workflow-node" style="top: 200px; left: 600px;">
+                <div class="node-header bg-green-50 text-green-800">Process Data</div>
+                <div class="node-content">Extract text from the file.</div>
+            </div>
+             <div class="workflow-node" style="top: 400px; left: 600px;">
+                <div class="node-header bg-yellow-50 text-yellow-800">Condition</div>
+                <div class="node-content">If text contains "urgent"...</div>
+            </div>
+            <div class="workflow-node" style="top: 200px; left: 900px;">
+                <div class="node-header bg-purple-50 text-purple-800">Send Notification</div>
+                <div class="node-content">Send an alert to Slack.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zoom and navigation controls -->
+    <div id="zoom-controls">
+        <button id="zoom-in-btn" class="control-btn" title="Zoom In"><i class="fas fa-plus"></i></button>
+        <button id="zoom-out-btn" class="control-btn" title="Zoom Out"><i class="fas fa-minus"></i></button>
+        <button id="fit-to-screen-btn" class="control-btn" title="Fit to Screen"><i class="fas fa-expand"></i></button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const viewport = document.getElementById('viewport');
+            const workflowContainer = document.getElementById('workflow-container');
+            const zoomInBtn = document.getElementById('zoom-in-btn');
+            const zoomOutBtn = document.getElementById('zoom-out-btn');
+            const fitToScreenBtn = document.getElementById('fit-to-screen-btn');
+
+            let scale = 1;
+            let panX = 0;
+            let panY = 0;
+            let isPanning = false;
+            let startX, startY;
+
+            // Function to apply the current transform
+            function applyTransform() {
+                workflowContainer.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+            }
+
+            // Center and fit the workflow on initial load
+            fitToScreen();
+
+            // --- Panning Logic ---
+            viewport.addEventListener('mousedown', (e) => {
+                // Pan only when clicking on the viewport background, not on nodes
+                if (e.target !== viewport && e.target !== workflowContainer) return;
+                e.preventDefault();
+                isPanning = true;
+                startX = e.clientX - panX;
+                startY = e.clientY - panY;
+                viewport.style.cursor = 'grabbing';
+            });
+
+            viewport.addEventListener('mousemove', (e) => {
+                if (!isPanning) return;
+                e.preventDefault();
+                panX = e.clientX - startX;
+                panY = e.clientY - startY;
+                applyTransform();
+            });
+
+            window.addEventListener('mouseup', () => {
+                isPanning = false;
+                viewport.style.cursor = 'grab';
+            });
+            
+            viewport.addEventListener('mouseleave', () => {
+                isPanning = false;
+                 viewport.style.cursor = 'grab';
+            });
+
+
+            // --- Zooming Logic ---
+            viewport.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const zoomIntensity = 0.1;
+                const delta = e.deltaY > 0 ? -1 : 1;
+                const newScale = Math.max(0.1, Math.min(3, scale + delta * zoomIntensity * scale));
+
+                // Get mouse position relative to viewport
+                const rect = viewport.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                // Adjust pan to zoom towards the mouse cursor
+                // The formula is: newPan = mousePos - (mousePos - oldPan) * (newScale / oldScale)
+                panX = mouseX - (mouseX - panX) * (newScale / scale);
+                panY = mouseY - (mouseY - panY) * (newScale / scale);
+                
+                scale = newScale;
+                applyTransform();
+            });
+
+            // --- Control Buttons Logic ---
+            zoomInBtn.addEventListener('click', () => {
+                const newScale = Math.min(3, scale * 1.2);
+                centerZoom(newScale);
+            });
+
+            zoomOutBtn.addEventListener('click', () => {
+                const newScale = Math.max(0.1, scale * 0.8);
+                centerZoom(newScale);
+            });
+            
+            fitToScreenBtn.addEventListener('click', fitToScreen);
+
+            function centerZoom(newScale) {
+                const rect = viewport.getBoundingClientRect();
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                panX = centerX - (centerX - panX) * (newScale / scale);
+                panY = centerY - (centerY - panY) * (newScale / scale);
+                scale = newScale;
+                applyTransform();
+            }
+            
+            // --- Fit to Screen Logic ---
+            function fitToScreen() {
+                const nodes = workflowContainer.querySelectorAll('.workflow-node');
+                if (nodes.length === 0) {
+                    scale = 1;
+                    panX = 0;
+                    panY = 0;
+                    applyTransform();
+                    return;
+                };
+
+                let minX = Infinity, minY = Infinity, maxX = 0, maxY = 0;
+
+                nodes.forEach(node => {
+                    const left = node.offsetLeft;
+                    const top = node.offsetTop;
+                    const right = left + node.offsetWidth;
+                    const bottom = top + node.offsetHeight;
+                    if (left < minX) minX = left;
+                    if (top < minY) minY = top;
+                    if (right > maxX) maxX = right;
+                    if (bottom > maxY) maxY = bottom;
+                });
+
+                const contentWidth = maxX - minX;
+                const contentHeight = maxY - minY;
+                const viewportWidth = viewport.clientWidth;
+                const viewportHeight = viewport.clientHeight;
+
+                const padding = 100; // a little space around the content
+
+                const scaleX = (viewportWidth - padding * 2) / contentWidth;
+                const scaleY = (viewportHeight - padding * 2) / contentHeight;
+                
+                scale = Math.min(scaleX, scaleY, 1); // Do not scale up more than 100%
+
+                // Center the content
+                const contentCenterX = minX + contentWidth / 2;
+                const contentCenterY = minY + contentHeight / 2;
+
+                panX = (viewportWidth / 2) - (contentCenterX * scale);
+                panY = (viewportHeight / 2) - (contentCenterY * scale);
+
+                applyTransform();
+            }
+        });
+    </script>
+</body>
+</html>
