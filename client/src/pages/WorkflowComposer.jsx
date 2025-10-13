@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
+import { toPng, toSvg } from "html-to-image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -527,6 +528,8 @@ export default function WorkflowComposer() {
   const [apiKeys, setApiKeys] = useState({});
   const [executionLogs, setExecutionLogs] = useState([]);
   const canvasRef = useRef(null);
+  const workflowRef = useRef(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const loadTemplate = useCallback((template) => {
     setNodes(
@@ -584,7 +587,47 @@ export default function WorkflowComposer() {
       setShowApiKeyDialog(true);
       return;
     }
+    // Function to export the workflow as image
+    const exportImage = async (format) => {
+      if (!workflowRef.current) return;
+      setIsExporting(true);
 
+      try {
+        const node = workflowRef.current;
+
+        // Options to handle large workflows
+        const options = {
+          cacheBust: true,
+          width: node.scrollWidth,
+          height: node.scrollHeight,
+          style: {
+            transform: "scale(1)",
+            transformOrigin: "top left",
+            backgroundColor: "#fff", // white background
+          },
+        };
+
+        if (format === "png") {
+          const dataUrl = await toPng(node, options);
+          const link = document.createElement("a");
+          link.download = "workflow.png";
+          link.href = dataUrl;
+          link.click();
+        } else if (format === "svg") {
+          const dataUrl = await toSvg(node, options);
+          const blob = new Blob([dataUrl], { type: "image/svg+xml" });
+          const link = document.createElement("a");
+          link.download = "workflow.svg";
+          link.href = URL.createObjectURL(blob);
+          link.click();
+        }
+      } catch (error) {
+        console.error("❌ Export failed:", error);
+        alert("Failed to export the workflow. Please try again.");
+      } finally {
+        setIsExporting(false);
+      }
+    };
     setIsRunning(true);
     setExecutionLogs([]);
 
@@ -763,9 +806,8 @@ export default function WorkflowComposer() {
               {workflowTemplates.map((template) => (
                 <Card
                   key={template.id}
-                  className={`p-3 cursor-pointer hover:shadow-sm transition-all ${
-                    activeTemplate === template.id ? "ring-2 ring-primary" : ""
-                  }`}
+                  className={`p-3 cursor-pointer hover:shadow-sm transition-all ${activeTemplate === template.id ? "ring-2 ring-primary" : ""
+                    }`}
                   onClick={() => loadTemplate(template)}
                 >
                   <div className="flex justify-between items-start mb-2">
@@ -808,6 +850,21 @@ export default function WorkflowComposer() {
               <Button variant="outline" size="sm">
                 <Download className="w-4 h-4 mr-2" />
                 Export JSON
+              </Button>
+              <Button variant="outline"
+                onClick={() => exportImage("png")}
+                disabled={isExporting}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow transition"
+              >
+                {isExporting ? "Exporting..." : "Export PNG"}
+              </Button>
+
+              <Button variant="outline"
+                onClick={() => exportImage("svg")}
+                disabled={isExporting}
+                className="bg-green-600 hover:bg-green-700 text-white font-medium px-4 py-2 rounded-lg shadow transition"
+              >
+                {isExporting ? "Exporting..." : "Export SVG"}
               </Button>
               <Button
                 size="sm"
@@ -920,11 +977,10 @@ export default function WorkflowComposer() {
                       top: node.y * zoom + canvasOffset.y,
                       transform: `scale(${zoom})`,
                     }}
-                    className={`w-48 bg-background border-2 rounded-lg p-3 cursor-pointer shadow-sm ${
-                      selectedNode?.id === node.id
-                        ? "border-primary"
-                        : "border-border hover:border-muted-foreground"
-                    }`}
+                    className={`w-48 bg-background border-2 rounded-lg p-3 cursor-pointer shadow-sm ${selectedNode?.id === node.id
+                      ? "border-primary"
+                      : "border-border hover:border-muted-foreground"
+                      }`}
                     onClick={() => setSelectedNode(node)}
                   >
                     <div className="flex items-center gap-2 mb-2">
@@ -1007,23 +1063,21 @@ export default function WorkflowComposer() {
                     key={index}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className={`mb-1 ${
-                      log.level === "SUCCESS"
-                        ? "text-green-400"
-                        : log.level === "ERROR"
-                          ? "text-red-400"
-                          : "text-gray-300"
-                    }`}
+                    className={`mb-1 ${log.level === "SUCCESS"
+                      ? "text-green-400"
+                      : log.level === "ERROR"
+                        ? "text-red-400"
+                        : "text-gray-300"
+                      }`}
                   >
                     <span className="text-gray-500">[{log.timestamp}]</span>{" "}
                     <span
-                      className={`${
-                        log.level === "SUCCESS"
-                          ? "text-green-400"
-                          : log.level === "ERROR"
-                            ? "text-red-400"
-                            : "text-blue-400"
-                      }`}
+                      className={`${log.level === "SUCCESS"
+                        ? "text-green-400"
+                        : log.level === "ERROR"
+                          ? "text-red-400"
+                          : "text-blue-400"
+                        }`}
                     >
                       {log.level}
                     </span>{" "}
