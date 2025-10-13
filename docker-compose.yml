@@ -1,0 +1,70 @@
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: tailai-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - tailai-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: tailai-server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/agentic-ai-lab
+      - PORT=8000
+      - CLIENT_URL=http://localhost:3000
+    env_file:
+      - ./server/.env
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    networks:
+      - tailai-network
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: tailai-client
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api/v1
+      - VITE_SOCKET_URL=http://localhost:8000
+      - VITE_FLASK_API_URL=http://localhost:5000
+    env_file:
+      - ./client/.env
+    depends_on:
+      - server
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    networks:
+      - tailai-network
+
+volumes:
+  mongo-data:
+    driver: local
+
+networks:
+  tailai-network:
+    driver: bridge
