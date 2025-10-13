@@ -1,0 +1,35 @@
+# Automatically label PRs based on changed files
+
+docker:
+  - changed-files:
+    - any-glob-to-any-file: 
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - '.dockerignore'
+      - '**/Dockerfile'
+
+frontend:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'client/**/*'
+
+backend:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'server/**/*'
+
+documentation:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+
+config:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/.env.example'
+      - '**/package.json'
+
+ci/cd:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/**/*'
