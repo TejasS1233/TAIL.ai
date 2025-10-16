@@ -66,6 +66,7 @@ import {
   Eye,
   Link,
 } from "lucide-react";
+import MiniMap from "@/components/MiniMap";
 
 const nodeCategories = {
   LLMs: [
@@ -530,6 +531,24 @@ export default function WorkflowComposer() {
   const canvasRef = useRef(null);
   const workflowRef = useRef(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const canvasElement = canvasRef.current;
+    if (!canvasElement) return;
+
+    const resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        setCanvasDimensions({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        });
+      }
+    });
+
+    resizeObserver.observe(canvasElement);
+    return () => resizeObserver.unobserve(canvasElement);
+  }, []);
 
   const loadTemplate = useCallback((template) => {
     setNodes(
@@ -587,7 +606,6 @@ export default function WorkflowComposer() {
       setShowApiKeyDialog(true);
       return;
     }
-    // Function to export the workflow as image
     const exportImage = async (format) => {
       if (!workflowRef.current) return;
       setIsExporting(true);
@@ -595,7 +613,6 @@ export default function WorkflowComposer() {
       try {
         const node = workflowRef.current;
 
-        // Options to handle large workflows
         const options = {
           cacheBust: true,
           width: node.scrollWidth,
@@ -603,7 +620,7 @@ export default function WorkflowComposer() {
           style: {
             transform: "scale(1)",
             transformOrigin: "top left",
-            backgroundColor: "#fff", // white background
+            backgroundColor: "#fff",
           },
         };
 
@@ -749,380 +766,383 @@ export default function WorkflowComposer() {
   };
 
   return (
-  <div className="h-screen flex overflow-hidden bg-background">
-    {/* Left Sidebar - Node Palette */}
-    <div className="w-80 border-r bg-muted/30 flex flex-col">
-      <div className="flex-shrink-0 p-4 border-b">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Components</h2>
-          <Button variant="outline" size="sm" onClick={() => setShowApiKeyDialog(true)}>
-            <Key className="w-4 h-4 mr-2" />
-            API Keys
-          </Button>
+    <div className="h-screen flex overflow-hidden bg-background">
+      <div className="w-80 border-r bg-muted/30 flex flex-col">
+        <div className="flex-shrink-0 p-4 border-b">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Components</h2>
+            <Button variant="outline" size="sm" onClick={() => setShowApiKeyDialog(true)}>
+              <Key className="w-4 h-4 mr-2" />
+              API Keys
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
-        <Tabs defaultValue="nodes" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="nodes">Nodes</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
-          </TabsList>
+        <div className="flex-1 overflow-y-auto p-4">
+          <Tabs defaultValue="nodes" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="nodes">Nodes</TabsTrigger>
+              <TabsTrigger value="templates">Templates</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="nodes" className="space-y-4 mt-4">
-            {Object.entries(nodeCategories).map(([category, nodeTypes]) => (
-              <div key={category}>
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">{category}</h3>
-                <div className="space-y-1">
-                  {nodeTypes.map((node) => {
-                    const IconComponent = node.icon;
-                    return (
-                      <motion.div
-                        key={node.id}
-                        draggable
-                        onDragStart={() => setDraggedNode(node)}
-                        onDragEnd={() => setDraggedNode(null)}
-                        whileHover={{ scale: 1.02 }}
-                        className="flex items-center gap-3 p-2 rounded-lg border bg-background cursor-grab hover:shadow-sm active:cursor-grabbing"
-                      >
-                        <div
-                          className={`w-8 h-8 ${node.color} rounded-lg flex items-center justify-center`}
+            <TabsContent value="nodes" className="space-y-4 mt-4">
+              {Object.entries(nodeCategories).map(([category, nodeTypes]) => (
+                <div key={category}>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">{category}</h3>
+                  <div className="space-y-1">
+                    {nodeTypes.map((node) => {
+                      const IconComponent = node.icon;
+                      return (
+                        <motion.div
+                          key={node.id}
+                          draggable
+                          onDragStart={() => setDraggedNode(node)}
+                          onDragEnd={() => setDraggedNode(null)}
+                          whileHover={{ scale: 1.02 }}
+                          className="flex items-center gap-3 p-2 rounded-lg border bg-background cursor-grab hover:shadow-sm active:cursor-grabbing"
                         >
-                          <IconComponent className="w-4 h-4 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm">{node.label}</div>
-                          <div className="text-xs text-muted-foreground truncate">
-                            {node.description}
+                          <div
+                            className={`w-8 h-8 ${node.color} rounded-lg flex items-center justify-center`}
+                          >
+                            <IconComponent className="w-4 h-4 text-white" />
                           </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm">{node.label}</div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {node.description}
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </TabsContent>
+              ))}
+            </TabsContent>
 
-          <TabsContent value="templates" className="space-y-2 mt-4">
-            {workflowTemplates.map((template) => (
-              <Card
-                key={template.id}
-                className={`p-3 cursor-pointer hover:shadow-sm transition-all ${
-                  activeTemplate === template.id ? "ring-2 ring-primary" : ""
-                }`}
-                onClick={() => loadTemplate(template)}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-medium text-sm">{template.name}</h4>
-                  <Badge variant="secondary" className="text-xs">
-                    {template.complexity}
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground mb-2">{template.description}</p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <GitBranch className="w-3 h-3" />
-                  {template.nodes.length} nodes
-                </div>
-              </Card>
-            ))}
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-
-    {/* Main Canvas Area */}
-    <div className="flex-1 flex flex-col">
-      {/* Toolbar */}
-      <div className="border-b bg-background p-4 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold">Workflow Composer</h1>
-            <Badge variant="outline">LangFlow Compatible</Badge>
-            {nodes.length > 0 && <Badge variant="secondary">{nodes.length} nodes</Badge>}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <Save className="w-4 h-4 mr-2" />
-              Save
-            </Button>
-            <Button variant="outline" size="sm">
-              <Share className="w-4 h-4 mr-2" />
-              Share
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              Export JSON
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleRunWorkflow}
-              disabled={isRunning || nodes.length === 0}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              {isRunning ? (
-                <>
-                  <Clock className="w-4 h-4 mr-2 animate-spin" />
-                  Running...
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4 mr-2" />
-                  Run Workflow
-                </>
-              )}
-            </Button>
-          </div>
+            <TabsContent value="templates" className="space-y-2 mt-4">
+              {workflowTemplates.map((template) => (
+                <Card
+                  key={template.id}
+                  className={`p-3 cursor-pointer hover:shadow-sm transition-all ${
+                    activeTemplate === template.id ? "ring-2 ring-primary" : ""
+                  }`}
+                  onClick={() => loadTemplate(template)}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-medium text-sm">{template.name}</h4>
+                    <Badge variant="secondary" className="text-xs">
+                      {template.complexity}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">{template.description}</p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <GitBranch className="w-3 h-3" />
+                    {template.nodes.length} nodes
+                  </div>
+                </Card>
+              ))}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
-      {/* Canvas */}
-      <div
-        ref={canvasRef}
-        className="flex-1 relative overflow-hidden"
-        style={{
-          backgroundImage: "radial-gradient(circle, #e5e7eb 1px, transparent 1px)",
-          backgroundSize: `${20 * zoom}px ${20 * zoom}px`,
-          backgroundPosition: `${canvasOffset.x}px ${canvasOffset.y}px`,
-        }}
-        onDrop={handleCanvasDrop}
-        onDragOver={(e) => e.preventDefault()}
-      >
-        {nodes.length === 0 ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center"
-            >
-              <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4 mx-auto">
-                <Plus className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Start Building Your Workflow</h3>
-              <p className="text-muted-foreground mb-4 max-w-md">
-                Drag components from the left panel or load a template to begin
-              </p>
-              <div className="flex gap-2 justify-center">
-                <Button variant="outline" onClick={() => loadTemplate(workflowTemplates[0])}>
-                  <GitBranch className="w-4 h-4 mr-2" />
-                  Load RAG Template
-                </Button>
-              </div>
-            </motion.div>
+      <div className="flex-1 flex flex-col">
+        <div className="border-b bg-background p-4 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-semibold">Workflow Composer</h1>
+              <Badge variant="outline">LangFlow Compatible</Badge>
+              {nodes.length > 0 && <Badge variant="secondary">{nodes.length} nodes</Badge>}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm">
+                <Save className="w-4 h-4 mr-2" />
+                Save
+              </Button>
+              <Button variant="outline" size="sm">
+                <Share className="w-4 h-4 mr-2" />
+                Share
+              </Button>
+              <Button variant="outline" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                Export JSON
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleRunWorkflow}
+                disabled={isRunning || nodes.length === 0}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {isRunning ? (
+                  <>
+                    <Clock className="w-4 h-4 mr-2 animate-spin" />
+                    Running...
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 mr-2" />
+                    Run Workflow
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
-        ) : (
-          <div className="absolute inset-0">
-            {/* Render connections */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none">
-              {connections.map((conn, index) => {
-                const fromNode = nodes.find((n) => n.id.startsWith(conn.from));
-                const toNode = nodes.find((n) => n.id.startsWith(conn.to));
-                if (!fromNode || !toNode) return null;
+        </div>
 
-                const x1 = (fromNode.x + 100) * zoom + canvasOffset.x;
-                const y1 = (fromNode.y + 25) * zoom + canvasOffset.y;
-                const x2 = toNode.x * zoom + canvasOffset.x;
-                const y2 = (toNode.y + 25) * zoom + canvasOffset.y;
-
-                return (
-                  <line
-                    key={index}
-                    x1={x1}
-                    y1={y1}
-                    x2={x2}
-                    y2={y2}
-                    stroke="#6366f1"
-                    strokeWidth="2"
-                    markerEnd="url(#arrowhead)"
-                  />
-                );
-              })}
-              <defs>
-                <marker
-                  id="arrowhead"
-                  markerWidth="10"
-                  markerHeight="7"
-                  refX="9"
-                  refY="3.5"
-                  orient="auto"
-                >
-                  <polygon points="0 0, 10 3.5, 0 7" fill="#6366f1" />
-                </marker>
-              </defs>
-            </svg>
-
-            {/* Render nodes */}
-            {nodes.map((node) => {
-              const IconComponent = node.icon;
-              return (
-                <motion.div
-                  key={node.id}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  style={{
-                    position: "absolute",
-                    left: node.x * zoom + canvasOffset.x,
-                    top: node.y * zoom + canvasOffset.y,
-                    transform: `scale(${zoom})`,
-                  }}
-                  className={`w-48 bg-background border-2 rounded-lg p-3 cursor-pointer shadow-sm ${
-                    selectedNode?.id === node.id
-                      ? "border-primary"
-                      : "border-border hover:border-muted-foreground"
-                  }`}
-                  onClick={() => setSelectedNode(node)}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div
-                      className={`w-6 h-6 ${node.color} rounded flex items-center justify-center`}
-                    >
-                      <IconComponent className="w-3 h-3 text-white" />
-                    </div>
-                    <span className="font-medium text-sm">{node.label}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="ml-auto h-6 w-6 p-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setNodes(nodes.filter((n) => n.id !== node.id));
-                      }}
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
-                  <div className="text-xs text-muted-foreground">{node.type}</div>
-                  {/* Connection points */}
-                  <div className="absolute -left-2 top-1/2 w-4 h-4 bg-blue-500 rounded-full border-2 border-background"></div>
-                  <div className="absolute -right-2 top-1/2 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></div>
-                </motion.div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
-
-    {/* Right Panel - Properties & Execution */}
-    <div className="w-80 border-l bg-muted/30 flex flex-col">
-      <Tabs defaultValue="properties" className="flex-1 flex flex-col">
-        <TabsList className="grid w-full grid-cols-2 m-4 mb-0 flex-shrink-0">
-          <TabsTrigger value="properties">Properties</TabsTrigger>
-          <TabsTrigger value="execution">Execution</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="properties" className="flex-1 overflow-y-auto p-4 m-0">
-          {selectedNode ? (
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div
-                  className={`w-8 h-8 ${selectedNode.color} rounded-lg flex items-center justify-center`}
-                >
-                  <selectedNode.icon className="w-4 h-4 text-white" />
+        <div
+          ref={canvasRef}
+          className="flex-1 relative overflow-hidden"
+          style={{
+            backgroundImage: "radial-gradient(circle, #e5e7eb 1px, transparent 1px)",
+            backgroundSize: `${20 * zoom}px ${20 * zoom}px`,
+            backgroundPosition: `${canvasOffset.x}px ${canvasOffset.y}px`,
+          }}
+          onDrop={handleCanvasDrop}
+          onDragOver={(e) => e.preventDefault()}
+        >
+          {nodes.length === 0 ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center"
+              >
+                <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4 mx-auto">
+                  <Plus className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <div>
-                  <h3 className="font-semibold">{selectedNode.label}</h3>
-                  <p className="text-xs text-muted-foreground">{selectedNode.id}</p>
+                <h3 className="text-lg font-semibold mb-2">Start Building Your Workflow</h3>
+                <p className="text-muted-foreground mb-4 max-w-md">
+                  Drag components from the left panel or load a template to begin
+                </p>
+                <div className="flex gap-2 justify-center">
+                  <Button variant="outline" onClick={() => loadTemplate(workflowTemplates[0])}>
+                    <GitBranch className="w-4 h-4 mr-2" />
+                    Load RAG Template
+                  </Button>
                 </div>
-              </div>
-              {renderNodeConfig(selectedNode)}
+              </motion.div>
             </div>
           ) : (
-            <div className="text-center text-muted-foreground">
-              <Settings className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">Select a node to configure its properties</p>
+            <div className="absolute inset-0">
+              <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                {connections.map((conn, index) => {
+                  const fromNode = nodes.find((n) => n.id.startsWith(conn.from));
+                  const toNode = nodes.find((n) => n.id.startsWith(conn.to));
+                  if (!fromNode || !toNode) return null;
+
+                  const x1 = (fromNode.x + 100) * zoom + canvasOffset.x;
+                  const y1 = (fromNode.y + 25) * zoom + canvasOffset.y;
+                  const x2 = toNode.x * zoom + canvasOffset.x;
+                  const y2 = (toNode.y + 25) * zoom + canvasOffset.y;
+
+                  return (
+                    <line
+                      key={index}
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke="#6366f1"
+                      strokeWidth="2"
+                      markerEnd="url(#arrowhead)"
+                    />
+                  );
+                })}
+                <defs>
+                  <marker
+                    id="arrowhead"
+                    markerWidth="10"
+                    markerHeight="7"
+                    refX="9"
+                    refY="3.5"
+                    orient="auto"
+                  >
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#6366f1" />
+                  </marker>
+                </defs>
+              </svg>
+
+              {nodes.map((node) => {
+                const IconComponent = node.icon;
+                return (
+                  <motion.div
+                    key={node.id}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    style={{
+                      position: "absolute",
+                      left: node.x * zoom + canvasOffset.x,
+                      top: node.y * zoom + canvasOffset.y,
+                      transform: `scale(${zoom})`,
+                    }}
+                    className={`w-48 bg-background border-2 rounded-lg p-3 cursor-pointer shadow-sm ${
+                      selectedNode?.id === node.id
+                        ? "border-primary"
+                        : "border-border hover:border-muted-foreground"
+                    }`}
+                    onClick={() => setSelectedNode(node)}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <div
+                        className={`w-6 h-6 ${node.color} rounded flex items-center justify-center`}
+                      >
+                        <IconComponent className="w-3 h-3 text-white" />
+                      </div>
+                      <span className="font-medium text-sm">{node.label}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="ml-auto h-6 w-6 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setNodes(nodes.filter((n) => n.id !== node.id));
+                        }}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    <div className="text-xs text-muted-foreground">{node.type}</div>
+                    <div className="absolute -left-2 top-1/2 w-4 h-4 bg-blue-500 rounded-full border-2 border-background"></div>
+                    <div className="absolute -right-2 top-1/2 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></div>
+                  </motion.div>
+                );
+              })}
             </div>
           )}
-        </TabsContent>
+          <AnimatePresence>
+            {nodes.length > 0 && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <MiniMap 
+                  nodes={nodes}
+                  canvasDimensions={canvasDimensions}
+                  canvasOffset={canvasOffset}
+                  zoom={zoom}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
 
-        <TabsContent value="execution" className="flex-1 overflow-y-auto p-4 m-0">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Execution Logs</h3>
-            <Badge variant={isRunning ? "default" : "secondary"}>
-              {isRunning ? "Running" : "Idle"}
-            </Badge>
-          </div>
+      <div className="w-80 border-l bg-muted/30 flex flex-col">
+        <Tabs defaultValue="properties" className="flex-1 flex flex-col">
+          <TabsList className="grid w-full grid-cols-2 m-4 mb-0 flex-shrink-0">
+            <TabsTrigger value="properties">Properties</TabsTrigger>
+            <TabsTrigger value="execution">Execution</TabsTrigger>
+          </TabsList>
 
-          <div className="bg-black rounded-lg p-3 h-64 overflow-y-auto font-mono text-xs">
-            {executionLogs.length === 0 ? (
-              <div className="text-gray-500">No execution logs yet...</div>
+          <TabsContent value="properties" className="flex-1 overflow-y-auto p-4 m-0">
+            {selectedNode ? (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div
+                    className={`w-8 h-8 ${selectedNode.color} rounded-lg flex items-center justify-center`}
+                  >
+                    <selectedNode.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{selectedNode.label}</h3>
+                    <p className="text-xs text-muted-foreground">{selectedNode.id}</p>
+                  </div>
+                </div>
+                {renderNodeConfig(selectedNode)}
+              </div>
             ) : (
-              executionLogs.map((log, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className={`mb-1 ${
-                    log.level === "SUCCESS"
-                      ? "text-green-400"
-                      : log.level === "ERROR"
-                        ? "text-red-400"
-                        : "text-gray-300"
-                  }`}
-                >
-                  <span className="text-gray-500">[{log.timestamp}]</span>{" "}
-                  <span
-                    className={`${
+              <div className="text-center text-muted-foreground">
+                <Settings className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Select a node to configure its properties</p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="execution" className="flex-1 overflow-y-auto p-4 m-0">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold">Execution Logs</h3>
+              <Badge variant={isRunning ? "default" : "secondary"}>
+                {isRunning ? "Running" : "Idle"}
+              </Badge>
+            </div>
+
+            <div className="bg-black rounded-lg p-3 h-64 overflow-y-auto font-mono text-xs">
+              {executionLogs.length === 0 ? (
+                <div className="text-gray-500">No execution logs yet...</div>
+              ) : (
+                executionLogs.map((log, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className={`mb-1 ${
                       log.level === "SUCCESS"
                         ? "text-green-400"
                         : log.level === "ERROR"
                           ? "text-red-400"
-                          : "text-blue-400"
+                          : "text-gray-300"
                     }`}
                   >
-                    {log.level}
-                  </span>{" "}
-                  {log.message}
+                    <span className="text-gray-500">[{log.timestamp}]</span>{" "}
+                    <span
+                      className={`${
+                        log.level === "SUCCESS"
+                          ? "text-green-400"
+                          : log.level === "ERROR"
+                            ? "text-red-400"
+                            : "text-blue-400"
+                      }`}
+                    >
+                      {log.level}
+                    </span>{" "}
+                    {log.message}
+                  </motion.div>
+                ))
+              )}
+              {isRunning && (
+                <motion.div
+                  animate={{ opacity: [1, 0.5, 1] }}
+                  transition={{ repeat: Infinity, duration: 1 }}
+                  className="text-gray-400"
+                >
+                  ▋
                 </motion.div>
-              ))
-            )}
-            {isRunning && (
-              <motion.div
-                animate={{ opacity: [1, 0.5, 1] }}
-                transition={{ repeat: Infinity, duration: 1 }}
-                className="text-gray-400"
-              >
-                ▋
-              </motion.div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
-
-    {/* API Keys Dialog */}
-    <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Configure API Keys</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="text-sm text-muted-foreground">
-            Enter your API keys to enable LLM nodes. Keys are stored locally and never sent to our
-            servers.
-          </div>
-
-          {Object.entries(llmConfigs).map(([provider, config]) => (
-            <div key={provider}>
-              <Label className="text-sm font-medium capitalize">{provider}</Label>
-              <Input
-                type="password"
-                placeholder={`Enter ${provider} API key`}
-                value={apiKeys[provider] || ""}
-                onChange={(e) => setApiKeys((prev) => ({ ...prev, [provider]: e.target.value }))}
-              />
+              )}
             </div>
-          ))}
+          </TabsContent>
+        </Tabs>
+      </div>
 
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setShowApiKeyDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={() => setShowApiKeyDialog(false)}>Save Keys</Button>
+      <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Configure API Keys</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Enter your API keys to enable LLM nodes. Keys are stored locally and never sent to our
+              servers.
+            </div>
+
+            {Object.entries(llmConfigs).map(([provider, config]) => (
+              <div key={provider}>
+                <Label className="text-sm font-medium capitalize">{provider}</Label>
+                <Input
+                  type="password"
+                  placeholder={`Enter ${provider} API key`}
+                  value={apiKeys[provider] || ""}
+                  onChange={(e) => setApiKeys((prev) => ({ ...prev, [provider]: e.target.value }))}
+                />
+              </div>
+            ))}
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowApiKeyDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => setShowApiKeyDialog(false)}>Save Keys</Button>
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  </div>
-);
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }
