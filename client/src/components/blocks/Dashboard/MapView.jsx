@@ -340,7 +340,7 @@ const MapView = () => {
   }, []);
 
   useEffect(() => {
-    if (user?.municipalOfficerProfile?.department) return;
+    if (!user?.municipalOfficerProfile?.department) return;
     const fetchReports = async () => {
       setLoading(true);
       try {

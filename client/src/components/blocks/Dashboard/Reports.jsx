@@ -268,7 +268,7 @@ const Reports = () => {
   };
 
   useEffect(() => {
-    if (user?.municipalOfficerProfile?.department) return;
+    if (!user?.municipalOfficerProfile?.department) return;
       const fetchReports = async (page = 1) => {
     setLoading(true);
     try {

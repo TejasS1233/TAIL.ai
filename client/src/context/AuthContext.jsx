@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState, useCallback } from "react";
 import { getCurrentUser, logoutUser } from "@/lib/auth";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
