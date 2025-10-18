@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Bell,
   Check,
@@ -30,11 +30,13 @@ const NotificationPage = () => {
   const [filter, setFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
 
-  const notifications = [
+const notifications = React.useMemo(
+  () => [
     {
       _id: "1",
       type: "reportUpdate",
-      message: "Your report about pothole on Main Street has been acknowledged by the authorities",
+      message:
+        "Your report about pothole on Main Street has been acknowledged by the authorities",
       read: false,
       createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
       relatedReportId: { title: "Pothole on Main Street", status: "acknowledged" },
@@ -72,7 +74,9 @@ const NotificationPage = () => {
       createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
       relatedReportId: { title: "Water leakage on Oak Avenue", status: "resolved" },
     },
-  ];
+  ],
+  []
+);
 
   const getNotificationIcon = (type) => {
     if (type === "reportUpdate") return <FileText className="w-5 h-5 text-blue-600" />;

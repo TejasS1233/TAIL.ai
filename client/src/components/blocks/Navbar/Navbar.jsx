@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/utils/useAuth";
 import { Logo } from "@/components/Logo";
 import { ModeToggle } from "@/components/ModeToggle";
 import { NAV_LINKS } from "@/config/nav";

@@ -7,7 +7,7 @@ const axiosInstance = axios.create({
 
 // Debug: log baseURL once in dev and surface network errors
 if (import.meta.env.DEV) {
-  // eslint-disable-next-line no-console
+   
   console.log("[API] baseURL:", axiosInstance.defaults.baseURL);
 }
 
@@ -17,7 +17,7 @@ axiosInstance.interceptors.response.use(
     if (import.meta.env.DEV) {
       const cfg = error?.config || {};
       const fullUrl = (cfg.baseURL || "") + (cfg.url || "");
-      // eslint-disable-next-line no-console
+       
       console.error("[API] Request failed", {
         url: fullUrl,
         method: cfg.method,

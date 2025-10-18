@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Send,
@@ -59,10 +60,9 @@ const Chat = () => {
 
   useEffect(() => {
     loadActiveSessions();
+    const currentRef = eventSourceRef.current;
     return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
+      if (currentRef) currentRef.close();
     };
   }, []);
   useEffect(() => {
@@ -114,7 +114,7 @@ const Chat = () => {
     switch (parsed.type) {
       case "thinking":
       case "tool_start":
-      case "tool_end":
+      case "tool_end": {
         // This is the CORRECT logic for "thinking" and tool events.
         // It adds a step to the "thoughtProcess" array for the UI.
         const thoughtStep = {
@@ -134,7 +134,7 @@ const Chat = () => {
           )
         );
         break;
-
+      }
       case "token":
         // This is the CORRECT logic for streaming message text.
         // It appends the incoming token to the message's `text` property.
@@ -234,7 +234,7 @@ const Chat = () => {
           } else {
             throw new Error("Fallback also failed");
           }
-        } catch (fallbackError) {
+        } catch {
           setMessages((prev) =>
             prev.map((msg) =>
               msg.id === aiMessageId
@@ -399,19 +399,19 @@ const Chat = () => {
                         <code>{children}</code>
                       </pre>
                     ),
-                  table: ({ node, ...props }) => (
+                  table: ({ ...props }) => (
                     <table
                       className="w-full my-2 border-collapse border border-slate-500"
                       {...props}
                     />
                   ),
-                  thead: ({ node, ...props }) => (
+                  thead: ({ ...props }) => (
                     <thead className="bg-slate-200 dark:bg-slate-800" {...props} />
                   ),
-                  th: ({ node, ...props }) => (
+                  th: ({ ...props }) => (
                     <th className="border border-slate-400 p-1.5 text-left text-xs" {...props} />
                   ),
-                  td: ({ node, ...props }) => (
+                  td: ({ ...props }) => (
                     <td className="border border-slate-400 p-1.5 align-top text-xs" {...props} />
                   ),
                 }}

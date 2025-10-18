@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
-import { toPng, toSvg } from "html-to-image";
+import React, { useState, useCallback, useRef } from "react";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,7 +66,6 @@ import {
   Eye,
   Link,
 } from "lucide-react";
-import MiniMap from "@/components/MiniMap";
 
 const nodeCategories = {
   LLMs: [
@@ -523,32 +522,12 @@ export default function WorkflowComposer() {
   const [isRunning, setIsRunning] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState(null);
   const [draggedNode, setDraggedNode] = useState(null);
-  const [canvasOffset, setCanvasOffset] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
+  const [canvasOffset, _setCanvasOffset] = useState({ x: 0, y: 0 });
+  const [zoom, _setZoom] = useState(1);
   const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
   const [apiKeys, setApiKeys] = useState({});
   const [executionLogs, setExecutionLogs] = useState([]);
   const canvasRef = useRef(null);
-  const workflowRef = useRef(null);
-  const [isExporting, setIsExporting] = useState(false);
-  const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    const canvasElement = canvasRef.current;
-    if (!canvasElement) return;
-
-    const resizeObserver = new ResizeObserver(entries => {
-      for (let entry of entries) {
-        setCanvasDimensions({
-          width: entry.contentRect.width,
-          height: entry.contentRect.height,
-        });
-      }
-    });
-
-    resizeObserver.observe(canvasElement);
-    return () => resizeObserver.unobserve(canvasElement);
-  }, []);
 
   const loadTemplate = useCallback((template) => {
     setNodes(
@@ -606,45 +585,47 @@ export default function WorkflowComposer() {
       setShowApiKeyDialog(true);
       return;
     }
-    const exportImage = async (format) => {
-      if (!workflowRef.current) return;
-      setIsExporting(true);
+    // Function to export the workflow as image
+    // const exportImage = async (format) => {
+    //   if (!workflowRef.current) return;
+    //   setIsExporting(true);
 
-      try {
-        const node = workflowRef.current;
+    //   try {
+    //     const node = workflowRef.current;
 
-        const options = {
-          cacheBust: true,
-          width: node.scrollWidth,
-          height: node.scrollHeight,
-          style: {
-            transform: "scale(1)",
-            transformOrigin: "top left",
-            backgroundColor: "#fff",
-          },
-        };
+    //     // Options to handle large workflows
+    //     const options = {
+    //       cacheBust: true,
+    //       width: node.scrollWidth,
+    //       height: node.scrollHeight,
+    //       style: {
+    //         transform: "scale(1)",
+    //         transformOrigin: "top left",
+    //         backgroundColor: "#fff", // white background
+    //       },
+    //     };
 
-        if (format === "png") {
-          const dataUrl = await toPng(node, options);
-          const link = document.createElement("a");
-          link.download = "workflow.png";
-          link.href = dataUrl;
-          link.click();
-        } else if (format === "svg") {
-          const dataUrl = await toSvg(node, options);
-          const blob = new Blob([dataUrl], { type: "image/svg+xml" });
-          const link = document.createElement("a");
-          link.download = "workflow.svg";
-          link.href = URL.createObjectURL(blob);
-          link.click();
-        }
-      } catch (error) {
-        console.error("❌ Export failed:", error);
-        alert("Failed to export the workflow. Please try again.");
-      } finally {
-        setIsExporting(false);
-      }
-    };
+    //     if (format === "png") {
+    //       const dataUrl = await toPng(node, options);
+    //       const link = document.createElement("a");
+    //       link.download = "workflow.png";
+    //       link.href = dataUrl;
+    //       link.click();
+    //     } else if (format === "svg") {
+    //       const dataUrl = await toSvg(node, options);
+    //       const blob = new Blob([dataUrl], { type: "image/svg+xml" });
+    //       const link = document.createElement("a");
+    //       link.download = "workflow.svg";
+    //       link.href = URL.createObjectURL(blob);
+    //       link.click();
+    //     }
+    //   } catch (error) {
+    //     console.error("❌ Export failed:", error);
+    //     alert("Failed to export the workflow. Please try again.");
+    //   } finally {
+    //     setIsExporting(false);
+    //   }
+    // };
     setIsRunning(true);
     setExecutionLogs([]);
 

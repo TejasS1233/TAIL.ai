@@ -114,7 +114,6 @@ function FormMessage({ className, ...props }) {
 }
 
 export {
-  useFormField,
   Form,
   FormItem,
   FormLabel,

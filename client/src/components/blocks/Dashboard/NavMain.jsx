@@ -6,7 +6,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-export function NavMain({ items, activeSection, onSectionChange }) {
+export function NavMain({ items, onSectionChange }) {
   const handleClick = (event, key) => {
     event.preventDefault();
     onSectionChange(key);

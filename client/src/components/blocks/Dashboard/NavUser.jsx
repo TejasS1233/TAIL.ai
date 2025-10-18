@@ -13,11 +13,11 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/context/AuthContext";
+import { useSidebar } from "./utils";
+import { useAuth } from "@/utils/useAuth";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "@/components/ThemeProvider";
+import { useTheme } from "@/utils/useTheme";
 
 export function NavUser() {
   const { isMobile } = useSidebar();

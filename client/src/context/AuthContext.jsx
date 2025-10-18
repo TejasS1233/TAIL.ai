@@ -1,7 +1,7 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
 import { getCurrentUser, logoutUser } from "@/lib/auth";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await getCurrentUser();
       setUser(res.data);
-    } catch (error) {
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);
@@ -37,12 +37,4 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
 };

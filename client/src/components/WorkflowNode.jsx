@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +8,6 @@ import { X, Settings, Play, Pause, CheckCircle, AlertCircle, Clock, Zap } from "
 export const WorkflowNode = ({
   node,
   isSelected,
-  isExecuting,
   executionStatus,
   onSelect,
   onDelete,

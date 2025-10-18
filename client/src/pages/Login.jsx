@@ -1,7 +1,7 @@
 import { useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/utils/useAuth";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "@/lib/axios";
@@ -88,7 +88,7 @@ export default function Login() {
       if (!credential) throw new Error("Google credential not received");
 
       if (import.meta.env.DEV) {
-        // eslint-disable-next-line no-console
+         
         console.log("[Google] credential length:", credential?.length, "baseURL:", axios.defaults.baseURL);
       }
 
@@ -138,8 +138,10 @@ export default function Login() {
           shape: "rectangular",
         });
       }
-    } catch {}
-  }, []);
+    } catch (err) {
+        console.error("Google login init error:", err);
+      }
+  }, [navigate,setUser]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">

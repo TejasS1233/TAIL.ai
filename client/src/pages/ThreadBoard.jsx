@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import axiosInstance from "@/lib/axios";
 import { socket } from "@/lib/socket";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/utils/useAuth";
 import { Toaster, toast } from "sonner";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 
 const TOPICS = [
@@ -66,7 +67,7 @@ export default function ThreadsPage() {
     tags: "",
   });
 
-  const fetchThreads = async () => {
+  const fetchThreads = useCallback(async () => {
     if (isUserLoading) return;
 
     try {
@@ -90,7 +91,7 @@ export default function ThreadsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  },[isUserLoading]);
 
   const fetchReplies = async (threadId, page = 1) => {
     try {
@@ -577,7 +578,7 @@ export default function ThreadsPage() {
       socket.off("new-thread", handleNewThread);
       socket.off("new-reply", handleNewReply);
     };
-  }, [user, isUserLoading]);
+  }, [user, isUserLoading,fetchThreads]);
 
   // Cleanup preview URLs on unmount
   useEffect(() => {
@@ -591,7 +592,7 @@ export default function ThreadsPage() {
         }
       });
     };
-  }, []);
+  }, [form.imagePreview,replyForms]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {

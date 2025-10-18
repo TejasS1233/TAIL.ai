@@ -1,6 +1,6 @@
 import * as React from "react";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/utils/useAuth";
 
 export function TeamSwitcher() {
   const { user } = useAuth();

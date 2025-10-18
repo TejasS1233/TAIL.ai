@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/utils/useAuth";
 import axiosInstance from "@/lib/axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +29,7 @@ import { toast } from "sonner";
 
 const Analytics = () => {
   const { user } = useAuth();
-  const [reports, setReports] = useState([]);
+  const [_reports, setReports] = useState([]);
   const [dailyData, setDailyData] = useState([]);
   const [locationData, setLocationData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,25 +65,6 @@ const Analytics = () => {
       label: "Reports",
       color: "#ef4444",
     },
-  };
-
-  const fetchReports = async () => {
-    setLoading(true);
-    try {
-      const response = await axiosInstance.get("/reports/department", {
-        params: { page: 1, limit: 1000 },
-      });
-      if (response.data.success) {
-        const reportsData = response.data.data.reports;
-        setReports(reportsData);
-        processAnalytics(reportsData);
-      }
-    } catch (error) {
-      console.error("Error fetching reports:", error);
-      toast.error("Failed to fetch analytics data");
-    } finally {
-      setLoading(false);
-    }
   };
 
   const processAnalytics = (data) => {
@@ -154,9 +135,26 @@ const Analytics = () => {
   };
 
   useEffect(() => {
-    if (user?.municipalOfficerProfile?.department) {
+    if (!user?.municipalOfficerProfile?.department) return;
+    const fetchReports = async () => {
+        setLoading(true);
+        try {
+          const response = await axiosInstance.get("/reports/department", {
+            params: { page: 1, limit: 1000 },
+          });
+          if (response.data.success) {
+            const reportsData = response.data.data.reports;
+            setReports(reportsData);
+            processAnalytics(reportsData);
+          }
+        } catch (error) {
+          console.error("Error fetching reports:", error);
+          toast.error("Failed to fetch analytics data");
+        } finally {
+          setLoading(false);
+        }
+      };
       fetchReports();
-    }
   }, [user]);
 
   if (!user?.municipalOfficerProfile) {
