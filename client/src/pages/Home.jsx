@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -11,11 +11,11 @@ export default function Home() {
   const sectionsRef = useRef([]);
   const splineRef = useRef();
 
-  const sections = ["hero", "agentic-lab", "features"];
+  const sections = useMemo(() => ["hero", "agentic-lab", "features"], []);
 
   useEffect(() => {
     sectionsRef.current = sections.map((id) => document.getElementById(id));
-  }, []);
+  }, [sections]);
 
   const scrollToSection = (sectionIndex) => {
     if (sectionIndex < 0 || sectionIndex >= sections.length) return;

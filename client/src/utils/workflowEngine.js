@@ -123,7 +123,7 @@ export class WorkflowEngine {
         }
         break;
 
-      case "processing":
+      case "processing":{
         const processingMessages = {
           openai: "Sending request to OpenAI API...",
           anthropic: "Calling Anthropic Claude API...",
@@ -141,8 +141,8 @@ export class WorkflowEngine {
           nodeId: node.id,
         });
         break;
-
-      case "success":
+      }
+      case "success": {
         const tokens = this.calculateTokenUsage(node.type, node.config);
         const cost = this.calculateCost(node.type, tokens, node.config);
 
@@ -163,7 +163,7 @@ export class WorkflowEngine {
           });
         }
         break;
-
+      }
       case "error":
         logs.push({
           timestamp,
@@ -211,17 +211,16 @@ export class WorkflowEngine {
         throw new Error("No nodes to execute");
       }
 
-      const requiredKeys = nodes
-        .filter((node) => ["openai", "anthropic", "cohere"].includes(node.type))
-        .map((node) => node.type);
+      const requiredNodes = nodes
+        .filter((node) => ["openai", "anthropic", "cohere"].includes(node.type));
 
-      for (const keyType of requiredKeys) {
+      for (const node of requiredNodes) {
         if (!node.config?.apiKey) {
           onLog([
             {
               timestamp: new Date().toLocaleTimeString(),
               level: "WARNING",
-              message: `Missing API key for ${keyType}. Using mock responses.`,
+              message: `Missing API key for ${node.type}. Using mock responses.`,
               nodeId: null,
             },
           ]);

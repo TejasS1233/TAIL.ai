@@ -3,10 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Send, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const ChatBotButton = () => {
-  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -166,7 +164,7 @@ const ChatBotButton = () => {
     if (isOpen && messages.length === 0) {
       setMessages([{ from: "bot", text: "Hi! I'm CivicAssist. How can I help you today?" }]);
     }
-  }, [isOpen]);
+  }, [isOpen,messages.length]);
 
   return (
     <>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/utils/useAuth";
 import axiosInstance from "@/lib/axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -120,20 +120,20 @@ const Reports = () => {
     rejected: AlertCircle,
   };
 
-  const chartConfig = {
-    reports: {
-      label: "Reports",
-      color: "#3b82f6",
-    },
-    resolved: {
-      label: "Resolved",
-      color: "#10b981",
-    },
-    pending: {
-      label: "Pending",
-      color: "#f59e0b",
-    },
-  };
+  // const chartConfig = {
+  //   reports: {
+  //     label: "Reports",
+  //     color: "#3b82f6",
+  //   },
+  //   resolved: {
+  //     label: "Resolved",
+  //     color: "#10b981",
+  //   },
+  //   pending: {
+  //     label: "Pending",
+  //     color: "#f59e0b",
+  //   },
+  // };
 
   const aiAssessmentSteps = [
     "Initializing AI model...",
@@ -267,7 +267,9 @@ const Reports = () => {
     }
   };
 
-  const fetchReports = async (page = 1) => {
+  useEffect(() => {
+    if (user?.municipalOfficerProfile?.department) return;
+      const fetchReports = async (page = 1) => {
     setLoading(true);
     try {
       const response = await axiosInstance.get(`/reports/department`, {
@@ -291,11 +293,7 @@ const Reports = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (user?.municipalOfficerProfile?.department) {
-      fetchReports(currentPage);
-    }
+    fetchReports(currentPage);
   }, [currentPage, user, searchTerm, selectedCategory]);
 
   const handleCategoryChange = (category) => {
@@ -325,21 +323,21 @@ const Reports = () => {
     );
   }
 
-  const statusDistribution = [
-    { name: "resolved", value: stats.resolved, fill: "#10b981" },
-    { name: "pending", value: stats.pending, fill: "#f59e0b" },
-    { name: "in_progress", value: stats.inProgress, fill: "#f97316" },
-  ];
+  // const statusDistribution = [
+  //   { name: "resolved", value: stats.resolved, fill: "#10b981" },
+  //   { name: "pending", value: stats.pending, fill: "#f59e0b" },
+  //   { name: "in_progress", value: stats.inProgress, fill: "#f97316" },
+  // ];
 
-  const categoryData = categories
-    .filter((cat) => cat.value !== "all")
-    .map((cat) => ({
-      name: cat.label,
-      reports: reports.filter((r) => r.category === cat.value).length,
-    }))
-    .filter((item) => item.reports > 0)
-    .sort((a, b) => b.reports - a.reports)
-    .slice(0, 6);
+  // const categoryData = categories
+  //   .filter((cat) => cat.value !== "all")
+  //   .map((cat) => ({
+  //     name: cat.label,
+  //     reports: reports.filter((r) => r.category === cat.value).length,
+  //   }))
+  //   .filter((item) => item.reports > 0)
+  //   .sort((a, b) => b.reports - a.reports)
+  //   .slice(0, 6);
 
   return (
     <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

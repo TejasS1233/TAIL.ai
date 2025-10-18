@@ -14,9 +14,8 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
-
+import { useSidebar } from "./utils";
 export function NavProjects({ projects }) {
   const { isMobile } = useSidebar();
 

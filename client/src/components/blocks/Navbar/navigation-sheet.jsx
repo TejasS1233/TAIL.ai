@@ -11,7 +11,7 @@ import {
 import { Menu } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/utils/useAuth";
 import { NAV_LINKS } from "@/config/nav";
 import { cn } from "@/lib/utils";
 

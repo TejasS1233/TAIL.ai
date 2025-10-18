@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
+import React, { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/utils/useAuth";
 import axiosInstance from "@/lib/axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -91,7 +91,7 @@ const DashboardHome = () => {
     },
   };
 
-  const fetchWorkers = async () => {
+  const fetchWorkers = useCallback(async () => {
     try {
       const response = await axiosInstance.get("/users", {
         params: {
@@ -119,9 +119,9 @@ const DashboardHome = () => {
       }
       return [];
     }
-  };
+  },[user?.municipalOfficerProfile?.department]);
 
-  const fetchReports = async () => {
+  const fetchReports = useCallback(async () => {
     try {
       const response = await axiosInstance.get("/reports/department", {
         params: { page: 1, limit: 1000 },
@@ -135,9 +135,9 @@ const DashboardHome = () => {
       console.error("Error fetching reports:", error);
       return [];
     }
-  };
+  },[]);
 
-  const calculateStats = (workersData, reportsData) => {
+  const calculateStats = useCallback((workersData, reportsData) => {
     const workerStats = {
       total: workersData.length,
       active: workersData.filter((w) => w.status === "active").length,
@@ -161,9 +161,9 @@ const DashboardHome = () => {
       ...reportStats,
       efficiency,
     });
-  };
+  },[]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [workersData, reportsData] = await Promise.all([fetchWorkers(), fetchReports()]);
@@ -171,9 +171,9 @@ const DashboardHome = () => {
     } finally {
       setLoading(false);
     }
-  };
+  },[fetchWorkers, fetchReports, calculateStats]);
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = workers;
 
     if (statusFilter !== "all") {
@@ -191,7 +191,7 @@ const DashboardHome = () => {
     }
 
     setFilteredWorkers(filtered);
-  };
+  },[workers, searchTerm, statusFilter]);
 
   const handleStatusChange = async (workerId, newStatus) => {
     try {
@@ -215,11 +215,11 @@ const DashboardHome = () => {
     if (user?.municipalOfficerProfile?.department) {
       fetchData();
     }
-  }, [user]);
+  }, [user,fetchData]);
 
   useEffect(() => {
     applyFilters();
-  }, [searchTerm, statusFilter, workers]);
+  }, [searchTerm, statusFilter, workers,applyFilters]);
 
   if (!user?.municipalOfficerProfile) {
     return (

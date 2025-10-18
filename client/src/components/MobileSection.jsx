@@ -1,6 +1,6 @@
 import React from "react";
 import { Download, BadgeCheck } from "lucide-react";
-import { useTheme } from "./ThemeProvider";
+import { useTheme } from "@/utils/useTheme";
 
 export default function App() {
   const { theme } = useTheme();

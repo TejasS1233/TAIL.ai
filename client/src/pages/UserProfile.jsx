@@ -56,7 +56,7 @@ export default function UserProfile() {
         const resReports = await axiosInstance.get(`/reports?citizenId=${id}`);
         setReports(resReports.data.data.reports);
         setPagination(resReports.data.data.pagination);
-      } catch (error) {
+      } catch {
         toast.error("Failed to load user profile or reports");
       } finally {
         setLoading(false);
@@ -77,7 +77,7 @@ export default function UserProfile() {
       setUser(res.data.data);
       setEditMode(false);
       toast.success("Profile updated successfully");
-    } catch (error) {
+    } catch  {
       toast.error("Failed to update profile");
     }
   };
@@ -96,7 +96,7 @@ export default function UserProfile() {
       });
       setUser((prev) => ({ ...prev, avatar: res.data.data.avatar }));
       toast.success("Avatar updated successfully");
-    } catch (error) {
+    } catch  {
       toast.error("Failed to update avatar");
     } finally {
       setUploading(false);

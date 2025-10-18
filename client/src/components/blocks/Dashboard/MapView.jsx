@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useAuth } from "@/context/AuthContext";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useAuth } from "@/utils/useAuth";
 import axiosInstance from "@/lib/axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -64,14 +64,14 @@ const MapView = () => {
     { value: "other", label: "Other", icon: <FileText className="h-4 w-4" /> },
   ];
 
-  const statusColors = {
+  const statusColors = React.useMemo(()=>({
     submitted: "#3b82f6",
     acknowledged: "#eab308",
     assigned: "#8b5cf6",
     in_progress: "#f97316",
     resolved: "#10b981",
     rejected: "#ef4444",
-  };
+  }),[]);
 
   const getCategoryColor = (category) => {
     const colors = {
@@ -104,25 +104,8 @@ const MapView = () => {
     return null;
   };
 
-  const fetchReports = async () => {
-    setLoading(true);
-    try {
-      const response = await axiosInstance.get("/reports/department");
-      if (response.data.success) {
-        const reportsData = response.data.data.reports;
-        console.log("Fetched reports:", reportsData.length);
-        setReports(reportsData);
-        applyFilters(reportsData);
-      }
-    } catch (error) {
-      console.error("Error fetching reports:", error);
-      toast.error(error.response?.data?.message || "Failed to fetch reports");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const applyFilters = (reportsData) => {
+  const applyFilters = useCallback((reportsData) => {
     let filtered = reportsData;
     if (selectedCategory !== "all") {
       filtered = filtered.filter((report) => report.category === selectedCategory);
@@ -142,9 +125,9 @@ const MapView = () => {
     });
     console.log("Filtered reports with coordinates:", reportsWithCoords.length);
     setFilteredReports(reportsWithCoords);
-  };
+  },[searchTerm, selectedCategory]);
 
-  const createReportsGeoJSON = (reportsData) => {
+  const createReportsGeoJSON = useCallback((reportsData) => {
     return {
       type: "FeatureCollection",
       features: reportsData
@@ -172,7 +155,7 @@ const MapView = () => {
         })
         .filter(Boolean),
     };
-  };
+  },[]);
 
   const initializeMap = () => {
     if (map.current || !mapContainer.current) return;
@@ -198,7 +181,7 @@ const MapView = () => {
     });
   };
 
-  const updateMapWithReports = () => {
+  const updateMapWithReports = useCallback(() => {
     if (!map.current || !mapReady || !filteredReports.length) return;
 
     console.log("Updating map with", filteredReports.length, "reports");
@@ -329,7 +312,7 @@ const MapView = () => {
     map.current.on("mouseleave", "unclustered-point", () => {
       map.current.getCanvas().style.cursor = "";
     });
-  };
+  },[mapReady, filteredReports,createReportsGeoJSON, statusColors]);
 
   const fetchReportDetails = async (reportId) => {
     try {
@@ -357,20 +340,36 @@ const MapView = () => {
   }, []);
 
   useEffect(() => {
-    if (user?.municipalOfficerProfile?.department) {
-      fetchReports();
-    }
-  }, [user]);
+    if (user?.municipalOfficerProfile?.department) return;
+    const fetchReports = async () => {
+      setLoading(true);
+      try {
+        const response = await axiosInstance.get("/reports/department");
+        if (response.data.success) {
+          const reportsData = response.data.data.reports;
+          console.log("Fetched reports:", reportsData.length);
+          setReports(reportsData);
+          applyFilters(reportsData);
+        }
+      } catch (error) {
+        console.error("Error fetching reports:", error);
+        toast.error(error.response?.data?.message || "Failed to fetch reports");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReports();
+  }, [user,applyFilters]);
 
   useEffect(() => {
     applyFilters(reports);
-  }, [selectedCategory, searchTerm, reports]);
+  }, [selectedCategory, searchTerm, reports,applyFilters]);
 
   useEffect(() => {
     if (mapReady) {
       updateMapWithReports();
     }
-  }, [mapReady, filteredReports]);
+  }, [mapReady, filteredReports,updateMapWithReports]);
 
   useEffect(() => {
     window.openReportModal = fetchReportDetails;
