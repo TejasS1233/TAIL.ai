@@ -747,7 +747,7 @@ export default function WorkflowComposer() {
   };
 
   return (
-    <div className="h-screen flex overflow-hidden bg-background">
+    <div className="h-screen flex overflow-hidden bg-background pt-20">
       <div className="w-80 border-r bg-muted/30 flex flex-col">
         <div className="flex-shrink-0 p-4 border-b">
           <div className="flex items-center justify-between mb-4">
