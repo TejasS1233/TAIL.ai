@@ -92,7 +92,7 @@ export default function Playground() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-18">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
