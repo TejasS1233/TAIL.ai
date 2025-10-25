@@ -1,3 +1,11 @@
+FROM node:20-alpine
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+ENV NODE_ENV=production
+EXPOSE 8001
+CMD ["node", "-r", "dotenv/config", "--experimental-json-modules", "src/index.js"]
 # server/Dockerfile
 FROM node:22-alpine
 

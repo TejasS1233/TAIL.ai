@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "tailai-ml"
+version = "0.1.0"
+description = "ML microservice for TAIL.ai - placeholder LangChain-style wrappers"
+authors = ["TAIL.ai <dev@tail.ai>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.95.0"
+uvicorn = { extras = ["standard"], version = "^0.22.0" }
+pydantic = "^2.5.1"
+requests = "^2.31.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^8.4.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
