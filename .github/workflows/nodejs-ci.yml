@@ -14,10 +14,20 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          # Use Node 20 to match Vite/client requirements and avoid engine issues
+          node-version: '20'
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - name: Install server deps
         working-directory: server
-        run: npm ci
+        # Use npm install to be resilient to missing lockfile in subfolders
+        run: npm install --no-audit --no-fund
       - name: Lint (placeholder)
         working-directory: server
         run: echo "lint step - add eslint commands"
