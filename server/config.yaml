@@ -1,0 +1,6 @@
+PORT: 8001
+MONGODB_URI: "mongodb://localhost:27017/agentic-ai-lab"
+NODE_ENV: development
+
+# OPSWAT placeholder
+OPSWAT_API_KEY: "REPLACE_WITH_KEY"
