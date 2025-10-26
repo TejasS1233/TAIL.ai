@@ -1,6 +1,4 @@
-# TAIL.ai
-
-**The AI Lab** - Build, Test & Deploy AI Agents Visually
+<img src="ReadmeBanner/Tail.aiBanner.png" alt="Tail.ai Banner" width="100%">
 
 ## Overview
 
