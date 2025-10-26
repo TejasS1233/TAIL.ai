@@ -33,8 +33,8 @@ try {
 
 connectDB()
   .then(() => {
-    const port = process.env.PORT || 8000;
-    console.log("Allowed CORS origins:", (process.env.CORS_ORIGIN || "").split(",").map((o) => o.trim()).filter(Boolean));
+  const port = process.env.PORT || 8002;
+  console.log("Allowed CORS origins:", (process.env.CORS_ORIGIN || "").split(",").map((o) => o.trim()).filter(Boolean));
 
     // Handle server errors (e.g., EADDRINUSE) to avoid unhandled exceptions
     httpServer.on('error', (err) => {
@@ -47,10 +47,8 @@ connectDB()
     });
 
     httpServer.listen(port, () => {
-      console.log(`🚀 Server running at: http://localhost:${process.env.PORT || 8000}/`);
-      console.log(
-        `❤️  Check health at: http://localhost:${process.env.PORT || 8000}/api/v1/health`
-      );
+      console.log(`🚀 Server running at: http://localhost:${port}/`);
+      console.log(`❤️  Check health at: http://localhost:${port}/api/v1/healthcheck`);
     });
   })
   .catch((err) => {

@@ -79,6 +79,8 @@ import mlProxyRouter from './routes/ml_proxy.js';
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/healthcheck", healthcheckRouter);
+// Backwards-compatible alias for older clients/scripts that request `/api/v1/health`
+app.use("/api/v1/health", healthcheckRouter);
 app.use("/api/v1/payments", paymentRouter);
 app.use("/api/v1/chatbot", chatbotRoutes);
 app.use("/api/v1/chat", chatRouter);
