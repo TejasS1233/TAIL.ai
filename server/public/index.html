@@ -1,0 +1,55 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TAIL.ai — Dev Server</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; margin: 0; padding: 0; background: #0f172a; color: #e6eef8; }
+      .wrap { max-width: 980px; margin: 48px auto; padding: 24px; }
+      header { display:flex; align-items:center; gap:16px }
+      h1 { margin: 0; font-size: 28px; }
+      .card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.04); padding: 18px; border-radius: 12px; margin-top: 18px; }
+      a.button { display:inline-block; padding: 10px 14px; background: #2563eb; color: white; border-radius: 8px; text-decoration:none; }
+      pre { background: rgba(255,255,255,0.02); padding: 12px; border-radius: 8px; overflow:auto }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12 2L2 7l10 5 10-5-10-5zm0 7.2L4.24 7 12 3.8 19.76 7 12 9.2zM2 17l10 5 10-5v-4l-10 5-10-5v4z'/%3E%3C/svg%3E" alt="logo" />
+        <div>
+          <h1>TAIL.ai — Dev Server</h1>
+          <div style="color:#9fb3d8; font-size:13px">Backend: <strong id="backend">http://localhost:8002</strong></div>
+        </div>
+      </header>
+
+      <div class="card">
+        <p>This is a lightweight static fallback page served by the backend so the website is reachable while the full React + ML stack is brought up.</p>
+        <p>Available API endpoints (examples):</p>
+        <ul>
+          <li><a class="button" href="/api/v1/healthcheck" target="_blank">/api/v1/healthcheck</a></li>
+          <li><a class="button" href="/api/v1/dev/token" target="_blank">/api/v1/dev/token (POST)</a></li>
+          <li><a class="button" href="/api/v1/scan" target="_blank">/api/v1/scan (POST upload)</a></li>
+        </ul>
+        <p style="margin-top:12px">To run the full frontend and ML microservice, follow one of these options (recommended):</p>
+        <ol>
+          <li>Install Docker and run <code>docker compose up --build</code> to run the full stack in containers.</li>
+          <li>Or install Python 3.11 and Node >=22.12 locally, then run the ML service and the client dev server:</li>
+        </ol>
+        <pre>cd ml_service
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8003 --reload
+
+cd ..\client
+npm install
+npm run dev
+        </pre>
+      </div>
+
+      <footer style="margin-top:18px; color:#8fa8cf; font-size:13px">If you want, I can: (A) try to run the full site using Docker (if installed), (B) attempt to upgrade host Node/Python, or (C) continue with additional fixes—tell me which.</footer>
+    </div>
+  </body>
+</html>

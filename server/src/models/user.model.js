@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 const userSchema = new Schema(
   {
     fullname: {
@@ -97,4 +97,4 @@ userSchema.methods.generateRefreshToken = function () {
 };
 userSchema.index({ googleId: 1 }, { unique: true, sparse: true });
 
-export const User = mongoose.model("User", userSchema);
+export const User = mongoose.models.User || mongoose.model("User", userSchema);

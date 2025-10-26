@@ -73,14 +73,22 @@ import chatbotRoutes from "./routes/chat.routes.js";
 import chatRouter from "./routes/chat.routes.js";
 
 import threadRouter from "./routes/thread.routes.js";
+import scanRouter from "./routes/scan.js";
+import devRouter from "./routes/dev.routes.js";
+import mlProxyRouter from './routes/ml_proxy.js';
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/healthcheck", healthcheckRouter);
+// Backwards-compatible alias for older clients/scripts that request `/api/v1/health`
+app.use("/api/v1/health", healthcheckRouter);
 app.use("/api/v1/payments", paymentRouter);
 app.use("/api/v1/chatbot", chatbotRoutes);
 app.use("/api/v1/chat", chatRouter);
 
 app.use("/api/v1/threads", threadRouter);
+app.use("/api/v1/scan", scanRouter);
+app.use('/api/v1/dev', devRouter);
+app.use('/api/v1/ml', mlProxyRouter);
 
 io.on("connection", (socket) => {
   console.log(`Socket.IO client connected: ${socket.id}`);

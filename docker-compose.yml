@@ -22,11 +22,11 @@ services:
     container_name: tailai-server
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "8002:8002"
     environment:
       - NODE_ENV=development
       - MONGODB_URI=mongodb://mongodb:27017/agentic-ai-lab
-      - PORT=8000
+      - PORT=8002
       - CLIENT_URL=http://localhost:3000
     env_file:
       - ./server/.env
@@ -48,8 +48,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - VITE_API_BASE_URL=http://localhost:8000/api/v1
-      - VITE_SOCKET_URL=http://localhost:8000
+      - VITE_API_BASE_URL=http://localhost:8002/api/v1
+      - VITE_SOCKET_URL=http://localhost:8002
       - VITE_FLASK_API_URL=http://localhost:5000
     env_file:
       - ./client/.env
@@ -58,6 +58,17 @@ services:
     volumes:
       - ./client:/app
       - /app/node_modules
+    networks:
+      - tailai-network
+
+  ml_service:
+    build:
+      context: ./ml_service
+      dockerfile: Dockerfile
+    container_name: tailai-ml
+    restart: unless-stopped
+    ports:
+      - "8003:8003"
     networks:
       - tailai-network
 
